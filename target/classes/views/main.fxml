@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.shape.Line?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="723.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="id.ac.ukdw.www.rpblo.javafx_rplbo.MainController">
+<?import javafx.geometry.Insets?>
+<AnchorPane prefHeight="400.0" prefWidth="723.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="id.ac.ukdw.www.rpblo.javafx_rplbo.MainController">
    <children>
-      <TextField layoutX="57.0" layoutY="19.0" prefHeight="26.0" prefWidth="328.0" />
-      <HBox layoutX="394.0" layoutY="18.0" prefHeight="35.0" prefWidth="282.0">
-         <children>
+      <TextField fx:id="searchKategori" layoutX="14.0" layoutY="22.0" prefHeight="26.0" prefWidth="162.0" promptText="Masukkan Jenis kategori ..." />
+      <TextField fx:id="searchKataKunci" layoutX="187.0" layoutY="23.0" promptText="Masukkan Kata Kunci" />
+      <HBox layoutX="389.0" layoutY="18.0" prefHeight="35.0" prefWidth="310.0">
+          <ComboBox fx:id="comboKategori" layoutX="57.0" layoutY="55.0" onAction="#SearchByCategory" prefHeight="22.0" prefWidth="75.0" />
+
+          <children>
             <Button mnemonicParsing="false" onAction="#addCategory" text="addCategory">
                <HBox.margin>
                   <Insets right="8.0" />
