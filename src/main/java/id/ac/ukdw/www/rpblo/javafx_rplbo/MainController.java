@@ -1,48 +1,60 @@
 package id.ac.ukdw.www.rpblo.javafx_rplbo;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableView;
-
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 public class MainController {
 
+    @FXML private TableColumn<ToDo, String> aksi;
+    @FXML private Button btnKeluar;
+    @FXML private TableColumn<ToDo, String> deadline;
+    @FXML private TableColumn<ToDo, String> kategori;
+    @FXML private TableColumn<ToDo, String> todolist;
+    @FXML private TableColumn<ToDo, Void> noColumn;
+    @FXML private TableView<ToDo> TableView;
+    @FXML private ComboBox<String> comboKategori;
+    @FXML private TextField searchKategori;
 
-    @FXML
-    private TableColumn<ToDo, String> aksi;
 
-    @FXML
-    private Button btnKeluar;
 
-    @FXML
-    private TableColumn<ToDo, String> deadline;
+    private static final ObservableList<ToDo> toDoList = FXCollections.observableArrayList();
 
-    @FXML
-    private TableColumn<ToDo, String> kategori;
-
-    @FXML
-    private TableColumn<ToDo, String> todolist;
-
-    @FXML
-    private TableColumn<ToDo, Void> noColumn; // Void karena tidak pakai property langsung
-
+    public static ObservableList<ToDo> getToDoList() {
+        return toDoList;
+    }
 
     @FXML
     void SearchByCategory(ActionEvent event) {
+        applyFilter();
+    }
 
+    private void applyFilter() {
+        String kategoriDipilih = comboKategori.getValue();
+        if (kategoriDipilih == null || kategoriDipilih.equals("Semua")) {
+            TableView.setItems(toDoList);
+        } else {
+            ObservableList<ToDo> hasilFilter = FXCollections.observableArrayList();
+            for (ToDo todo : toDoList) {
+                if (todo.getKategori().equalsIgnoreCase(kategoriDipilih)) {
+                    hasilFilter.add(todo);
+                }
+            }
+            TableView.setItems(hasilFilter);
+        }
     }
 
     @FXML
     void addCategory(ActionEvent event) {
         Apps.showKategori();
-
+        // Jika kamu menyimpan kategori di tempat lain, kamu bisa perbarui ComboBox di sini.
     }
+
+
 
     @FXML
     void modul_tambah_todolist(ActionEvent event) {
@@ -50,30 +62,21 @@ public class MainController {
     }
 
     @FXML
-    private TableView<ToDo> TableView;
-
-    private static ObservableList<ToDo> toDoList = FXCollections.observableArrayList();
-
-    public static ObservableList<ToDo> getToDoList() {
-        return toDoList;
-    }
-    @FXML
     void Keluar() {
         Platform.exit();
     }
 
-
     @FXML
     public void initialize() {
-        // Set data binding
+        // Setup kolom tabel
         todolist.setCellValueFactory(cellData -> cellData.getValue().judulProperty());
         deadline.setCellValueFactory(cellData -> cellData.getValue().deadlineProperty());
         kategori.setCellValueFactory(cellData -> cellData.getValue().kategoriProperty());
 
-        // Kolom "Aksi" - Tambahkan tombol edit dan hapus
+        // Setup kolom aksi (edit & hapus)
         aksi.setCellFactory(col -> new TableCell<ToDo, String>() {
-            private final javafx.scene.control.Button editBtn = new javafx.scene.control.Button("Edit");
-            private final javafx.scene.control.Button hapusBtn = new javafx.scene.control.Button("Hapus");
+            private final Button editBtn = new Button("Edit");
+            private final Button hapusBtn = new Button("Hapus");
             private final javafx.scene.layout.HBox hbox = new javafx.scene.layout.HBox(5, editBtn, hapusBtn);
 
             {
@@ -82,32 +85,25 @@ public class MainController {
 
                 hapusBtn.setOnAction(event -> {
                     ToDo todo = getTableView().getItems().get(getIndex());
-                    MainController.getToDoList().remove(todo);
+                    toDoList.remove(todo);
+                    applyFilter(); // Pastikan filter diperbarui setelah hapus
                 });
 
                 editBtn.setOnAction(event -> {
                     ToDo todo = getTableView().getItems().get(getIndex());
-                    Apps.showTambahToDo(todo); // pastikan kamu punya metode showTambahToDo(ToDo todo)
+                    Apps.showTambahToDo(todo);
                 });
             }
 
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(hbox);
-                }
+                setGraphic(empty ? null : hbox);
             }
         });
 
-
-
-
-        // Kolom "No"
+        // Setup kolom nomor
         noColumn.setCellFactory(col -> new TableCell<ToDo, Void>() {
-
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
@@ -116,10 +112,64 @@ public class MainController {
                 } else {
                     setText(String.valueOf(getIndex() + 1));
                 }
-
-
             }
         });
 
+        // Tampilkan semua tugas awalnya
         TableView.setItems(toDoList);
-    }}
+
+        // Isi ComboBox kategori dan event listener
+        comboKategori.setItems(FXCollections.observableArrayList("Semua", "Kuliah", "Pekerjaan", "Pribadi"));
+        comboKategori.setValue("Semua");
+
+        // Tambahkan listener agar filtering jalan otomatis saat pilihan berubah
+        comboKategori.setOnAction(this::SearchByCategory);
+
+        searchKategori.textProperty().addListener((observable, oldValue, newValue) -> {
+            filterByKategoriTextField(newValue);
+
+        });
+
+
+    }
+
+    private void filterByKategoriTextField(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            TableView.setItems(toDoList); // tampilkan semua
+        } else {
+            ObservableList<ToDo> hasilFilter = FXCollections.observableArrayList();
+            for (ToDo todo : toDoList) {
+                String kategori = todo.getKategori();
+                if (kategori != null && kategori.toLowerCase().contains(keyword.toLowerCase())) {
+                    hasilFilter.add(todo);
+                }
+            }
+            TableView.setItems(hasilFilter);
+        }
+    }
+
+    private void filterToDoByAllFields(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            TableView.setItems(toDoList); // tampilkan semua
+            return;
+        }
+
+        String search = keyword.toLowerCase().trim();
+
+        ObservableList<ToDo> hasilFilter = FXCollections.observableArrayList();
+        for (ToDo todo : toDoList) {
+            String judul = todo.getJudul() != null ? todo.getJudul().toLowerCase() : "";
+            String kategori = todo.getKategori() != null ? todo.getKategori().toLowerCase() : "";
+            String deadline = todo.getDeadline() != null ? todo.getDeadline().toLowerCase() : "";
+
+            if (judul.contains(search) || kategori.contains(search) || deadline.contains(search)) {
+                hasilFilter.add(todo);
+            }
+        }
+
+        TableView.setItems(hasilFilter);
+    }
+
+
+
+}
