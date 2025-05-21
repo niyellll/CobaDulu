@@ -64,6 +64,12 @@ public class KategoriController {
         }
     }
 
+    @FXML
+    private void handleCancel() {
+        Apps.showMain();
+    }
+
+
     public static class Kategori {
             private final SimpleStringProperty nama;
 

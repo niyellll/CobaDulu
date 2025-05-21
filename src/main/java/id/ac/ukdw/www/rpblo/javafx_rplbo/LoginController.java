@@ -1,10 +1,9 @@
 package id.ac.ukdw.www.rpblo.javafx_rplbo;
 
-import id.ac.ukdw.www.rpblo.javafx_rplbo.Apps;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextField;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 
 public class LoginController {
 
@@ -19,13 +18,13 @@ public class LoginController {
         String user = usernameField.getText();
         String pass = passwordField.getText();
 
-        if (user.equals("admin") && pass.equals("123")) {
-            Apps.showMain();
+        if (user.equals(UserSession.registeredUsername) && pass.equals(UserSession.registeredPassword)) {
+            Apps.showMain();  // Arahkan ke halaman utama
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Password / Username Incorrect");
-            alert.setContentText("Please enter a valid password");
+            alert.setTitle("Login Error");
+            alert.setHeaderText("Username atau Password salah!");
+            alert.setContentText("Silakan periksa kembali.");
             alert.showAndWait();
         }
     }
